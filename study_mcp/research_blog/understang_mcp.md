@@ -1,4 +1,5 @@
 # 一文带你 "看见" MCP 的过程，彻底理解 MCP 的概念
+> https://mp.weixin.qq.com/s/UfzmzJ3zTOQ45ppRy5D6kA
 
 Original 悟鸣 [阿里云开发者](javascript:void(0);)
 
