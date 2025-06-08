@@ -5,9 +5,9 @@
 尽管MCP旨在促进LLM Agent与外部工具的无缝集成，但在其应用过程中也引入了一系列潜在的安全威胁和挑战。这些威胁源于其分布式特性、对外部工具的依赖以及可能处理敏感数据的本质。
 
 1.  **数据泄露与隐私风险 (Data Leakage and Privacy Risks)**:
-    *   **敏感数据传输**: MCP通信可能涉及在Host、Client和Server之间传输敏感信息，如用户个人数据、API密钥、专有业务逻辑或内部系统凭证。如果传输通道未加密或加密强度不足，数据可能被窃听。([raw_dr_deepseek.md] 强调了Stdio模式下父子进程通信的安全性，但也指出了网络传输（HTTP/SSE）需要TLS/SSL加密)。
+    *   **敏感数据传输**: MCP通信可能涉及在Host、Client和Server之间传输敏感信息，如用户个人数据、API密钥、专有业务逻辑或内部系统凭证。如果传输通道未加密或加密强度不足，数据可能被窃听。 强调了Stdio模式下父子进程通信的安全性，但也指出了网络传输（HTTP/SSE）需要TLS/SSL加密。
     *   **工具端数据处理不当**: 被调用的外部工具（Server）如果安全实践不良，可能导致数据在其端点泄露、被滥用或存储不当。
-    *   **上下文注入风险**: `ContextInject` 等操作如果被滥用，可能导致敏感或恶意上下文被注入到LLM中，影响其行为或泄露先前注入的上下文。([raw_dr_perplexity.md])
+    *   **上下文注入风险**: `ContextInject` 等操作如果被滥用，可能导致敏感或恶意上下文被注入到LLM中，影响其行为或泄露先前注入的上下文。
     *   **日志记录风险**: 通信日志或工具执行日志如果包含敏感参数或结果，且未得到妥善保护，可能成为泄露源。
 
 2.  **恶意调用与资源滥用 (Malicious Invocations and Resource Abuse)**:
@@ -24,7 +24,7 @@
 4.  **权限管理与控制不足 (Insufficient Permission Management and Control)**:
     *   **过度授权**: MCP Client或Server可能被授予了超出其完成任务所需最小权限的访问权限（最小权限原则未被遵守）。
     *   **权限提升**: 攻击者可能利用系统漏洞将低权限账户提升为高权限账户，从而获得对敏感工具或数据的访问权。
-    *   **不明确的范围界定**: 工具的 `required_scopes` ([raw_dr_deepseek.md]) 如果定义不清晰或执行不严格，可能导致权限控制失效。
+    *   **不明确的范围界定**: 工具的 `required_scopes`  如果定义不清晰或执行不严格，可能导致权限控制失效。
 
 5.  **供应链风险 (Supply Chain Risks)**:
     *   **不安全的第三方工具**: LLM Agent可能依赖于由第三方开发和维护的MCP Server或工具。如果这些第三方组件存在后门或安全漏洞，整个系统都可能受到威胁。
@@ -34,7 +34,7 @@
     *   **难以追踪的活动**: 如果没有充分的审计日志记录MCP请求、响应和工具执行情况，一旦发生安全事件，将难以追踪攻击源、评估损害范围和进行事后分析。
     *   **缺乏实时告警**: 对于可疑活动（如异常调用频率、尝试访问未授权工具等），如果缺乏实时监控和告警机制，可能无法及时发现和响应安全威胁。
 
-7.  **协议本身的复杂性与演进**: ([raw_dr_perplexity.md])
+7.  **协议本身的复杂性与演进**: 
     *   **动态上下文管理**: 虽然强大，但也引入了新的攻击向量，如上下文操纵。
     *   **版本控制**: 工具接口的版本管理如果处理不当，可能导致兼容性问题或意外暴露旧版本漏洞。
 
@@ -53,12 +53,12 @@ MCP本身作为一种通信协议，并不强制规定一套统一的认证（Au
 
 *   **基于应用层的认证 (通过MCP消息或HTTP头部传递凭证):**
     *   **API密钥 (API Keys)**: 
-        *   **机制**: Client在向Server发起请求时，在HTTP头部（如 `Authorization: Bearer <api_key>` 或自定义头部 `X-API-Key: <api_key>`）或MCP消息的 `params` 中包含一个预共享的API密钥。Server验证此密钥的有效性。([raw_dr_mita.md, raw_dr_grok.md])
+        *   **机制**: Client在向Server发起请求时，在HTTP头部（如 `Authorization: Bearer <api_key>` 或自定义头部 `X-API-Key: <api_key>`）或MCP消息的 `params` 中包含一个预共享的API密钥。Server验证此密钥的有效性。
         *   **优点**: 实现简单。
         *   **缺点**: 密钥管理（分发、轮换、撤销）可能复杂；密钥一旦泄露，身份即被冒用。
     *   **令牌认证 (Token-based Authentication - e.g., JWT, OAuth 2.0/2.1 Tokens)**:
-        *   **JWT (JSON Web Tokens)**: Client首先通过身份验证服务获取一个JWT。随后，Client在每次向MCP Server发起的请求中（通常在HTTP `Authorization: Bearer <jwt_token>` 头部）携带此JWT。Server验证JWT的签名、有效期和声明（claims）以确认Client身份和权限。([raw_dr_mita.md, raw_dr_grok.md])
-        *   **OAuth 2.0/2.1**: 一个更完整的授权框架，常用于第三方应用授权。LLM Agent (Client) 可以代表用户从授权服务器获取访问令牌 (Access Token)，然后使用此令牌向MCP Server (Resource Server) 请求服务。Server会验证令牌的有效性以及其关联的权限范围 (scopes)。([raw_dr_mita.md])
+        *   **JWT (JSON Web Tokens)**: Client首先通过身份验证服务获取一个JWT。随后，Client在每次向MCP Server发起的请求中（通常在HTTP `Authorization: Bearer <jwt_token>` 头部）携带此JWT。Server验证JWT的签名、有效期和声明（claims）以确认Client身份和权限。
+        *   **OAuth 2.0/2.1**: 一个更完整的授权框架，常用于第三方应用授权。LLM Agent (Client) 可以代表用户从授权服务器获取访问令牌 (Access Token)，然后使用此令牌向MCP Server (Resource Server) 请求服务。Server会验证令牌的有效性以及其关联的权限范围 (scopes)。
         *   **优点**: 标准化、安全性较高（尤其OAuth 2.0）、支持细粒度权限控制（通过scopes）。
         *   **缺点**: 实现相对复杂，尤其对于OAuth 2.0的完整流程。
     *   **自定义凭证/签名机制**: 应用程序可以实现自定义的凭证交换或请求签名机制，例如基于HMAC的请求签名，以确保请求的完整性和来源真实性。
@@ -77,7 +77,7 @@ MCP本身作为一种通信协议，并不强制规定一套统一的认证（Au
     *   **缺点**: 策略定义和管理可能非常复杂。
 
 *   **范围/权限声明 (Scopes/Permissions)**:
-    *   **MCP工具描述中的 `required_scopes`**: MCP的工具元数据可以包含一个 `required_scopes` 字段，声明调用该工具所需的一组权限范围。([raw_dr_deepseek.md])
+    *   **MCP工具描述中的 `required_scopes`**: MCP的工具元数据可以包含一个 `required_scopes` 字段，声明调用该工具所需的一组权限范围。
     *   **OAuth 2.0 Scopes**: 在OAuth 2.0流程中，Client请求访问令牌时会指定所需的scopes。授权服务器颁发的令牌会包含被授予的scopes。MCP Server在处理请求时，会检查令牌中的scopes是否满足工具方法所需的 `required_scopes`。
     *   **实现**: Client在请求时声明所需权限，Server在处理时验证Client是否拥有这些权限。
 
@@ -86,7 +86,7 @@ MCP本身作为一种通信协议，并不强制规定一套统一的认证（Au
     *   **优点**: 直观易懂。
     *   **缺点**: 当用户和资源数量庞大时，管理ACL可能变得困难。
 
-*   **零信任原则 (Zero Trust Principles)**: ([raw_dr_perplexity.md])
+*   **零信任原则 (Zero Trust Principles)**: 
     *   **动态凭证管理**: 避免硬编码凭证，使用短期有效的动态凭证。
     *   **属性加密**: 对敏感数据进行加密，并根据属性进行访问控制。
     *   **持续验证**: 不仅仅在初始连接时验证，而是在整个会话期间持续监控和验证访问请求。
@@ -112,7 +112,7 @@ MCP协议本身不直接定义加密算法或传输安全协议，而是依赖�
 这是保障MCP通信安全最关键的一环，尤其当MCP消息通过公共网络（如互联网）或不受信任的内部网络传输时。
 
 *   **适用场景**: 
-    *   **HTTP/S (HTTP Secure)**: 当MCP通过HTTP传输时，必须使用HTTPS。HTTPS通过在HTTP和TCP之间增加一层TLS/SSL协议来加密HTTP通信内容。([raw_dr_deepseek.md] 明确指出HTTP/SSE模式需要TLS/SSL加密)。
+    *   **HTTP/S (HTTP Secure)**: 当MCP通过HTTP传输时，必须使用HTTPS。HTTPS通过在HTTP和TCP之间增加一层TLS/SSL协议来加密HTTP通信内容。 明确指出HTTP/SSE模式需要TLS/SSL加密。
     *   **WSS (WebSocket Secure)**: 当MCP通过WebSocket传输时，必须使用WSS。WSS在WebSocket握手之上应用TLS/SSL加密。
     *   **gRPC with TLS**: gRPC默认推荐并支持使用TLS来加密其基于HTTP/2的通信。
 
@@ -126,7 +126,7 @@ MCP协议本身不直接定义加密算法或传输安全协议，而是依赖�
 
 当MCP Client和Server在同一台主机上通过标准输入/输出 (Stdio) 进行通信时，情况有所不同：
 
-*   **固有安全性**: Stdio通信是本地进程间通信 (IPC)。如果操作系统环境是安全的，并且父进程（通常是MCP Client或其宿主）对其创建的子进程（MCP Server）有适当的控制（例如，通过安全的进程创建和权限管理），那么Stdio通信本身可以被认为是相对安全的，因为它不经过网络。([raw_dr_deepseek.md] 提到Stdio模式下父子进程通信的安全性较高)。
+*   **固有安全性**: Stdio通信是本地进程间通信 (IPC)。如果操作系统环境是安全的，并且父进程（通常是MCP Client或其宿主）对其创建的子进程（MCP Server）有适当的控制（例如，通过安全的进程创建和权限管理），那么Stdio通信本身可以被认为是相对安全的，因为它不经过网络。 提到Stdio模式下父子进程通信的安全性较高。
 *   **潜在风险**: 
     *   如果主机本身受到威胁（例如，被恶意软件感染），那么本地IPC的安全性也可能受到损害。
     *   如果Server进程以过高权限运行，或者其实现存在漏洞，可能被利用来访问本地系统资源。
@@ -237,7 +237,6 @@ MCP协议本身不直接定义加密算法或传输安全协议，而是依赖�
 *   **仪表盘与可视化**: 使用Kibana等工具创建仪表盘，可视化关键安全指标和系统活动，便于监控和趋势分析。
 
 **Perplexity Labs MCP的审计追踪考虑：**
-Perplexity Labs提出的MCP扩展中，提到了“审计追踪 (Audit Trails)”作为零信任原则的一部分，强调了记录所有交互和访问尝试的重要性，以实现全面的可见性和问责制。([raw_dr_perplexity.md])
+Perplexity Labs提出的MCP扩展中，提到了“审计追踪 (Audit Trails)”作为零信任原则的一部分，强调了记录所有交互和访问尝试的重要性，以实现全面的可见性和问责制。
 
 通过实施健全的安全审计与日志记录策略，组织可以显著增强其MCP部署的安全性，提高对安全事件的检测、响应和恢复能力，并满足合规性要求。
-

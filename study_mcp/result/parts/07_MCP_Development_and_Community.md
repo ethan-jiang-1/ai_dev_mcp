@@ -72,12 +72,12 @@ MCP的未来发展将是一个持续迭代和社区驱动的过程。通过不�
 **潜在的或相关的MCP实现/SDK：**
 
 *   **DeepSeek AI 的MCP相关工具**: 
-    *   如果DeepSeek AI将其提出的MCP概念开源，可能会有官方的Python SDK（用于Client和Server）以及相关的示例项目。([raw_dr_deepseek.md] 提到了其MCP设计)。
+    *   如果DeepSeek AI将其提出的MCP概念开源，可能会有官方的Python SDK（用于Client和Server）以及相关的示例项目。 (提到了其MCP设计)。
     *   关注其GitHub组织或官方博客，可能会发布相关信息。
 *   **Perplexity Labs 的研究原型**: 
-    *   Perplexity Labs在论文中描述了其MCP扩展，如果他们发布了研究代码或原型实现，这将是重要的社区资源。([raw_dr_perplexity.md])
+    *   Perplexity Labs在论文中描述了其MCP扩展，如果他们发布了研究代码或原型实现，这将是重要的社区资源。
 *   **OpenAI API与Function Calling/Assistants API的生态**: 
-    *   虽然不直接称为MCP，但OpenAI的Function Calling和Assistants API中的工具使用（Tools）机制，在理念上与MCP有共通之处——即允许LLM调用外部函数/工具。([raw_dr_openai_o3.md] 提到了JSON作为数据格式和可选Protobuf)。
+    *   虽然不直接称为MCP，但OpenAI的Function Calling和Assistants API中的工具使用（Tools）机制，在理念上与MCP有共通之处——即允许LLM调用外部函数/工具。 (提到了JSON作为数据格式和可选Protobuf)。
     *   围绕OpenAI API已经有很多社区驱动的开源库和工具，用于简化函数调用、管理工具定义等，这些可以作为MCP实践的参考。
         *   **LangChain**: 一个广泛使用的框架，用于构建基于LLM的应用，它有强大的工具集成和Agent机制，其工具调用部分可以看作是一种特定形式的“MCP Client”实现。
         *   **LlamaIndex**: 专注于将LLM与外部数据连接，其数据连接器和查询引擎部分也可能涉及到与外部工具的交互。
@@ -196,4 +196,3 @@ MCP（Model Context Protocol）生态系统的建设是推动LLM Agent与外部�
 *   **持续吸纳新技术**: 保持对AI、分布式系统、网络通信等领域新技术进展的关注，并适时将其融入MCP的演进中。
 
 一个成功的MCP生态系统将是开放、协作、创新和可持续发展的。它需要协议设计者、平台提供商、工具开发者和应用构建者的共同努力，才能最终实现LLM Agent能力的极大释放，并推动AI技术在各行各业的深度应用。
-

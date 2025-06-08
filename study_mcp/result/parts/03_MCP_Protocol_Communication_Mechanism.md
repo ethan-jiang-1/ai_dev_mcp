@@ -4,7 +4,7 @@
 
 ## 3.1 MCP的消息格式与编码
 
-MCP严格遵循JSON-RPC 2.0规范进行消息的格式化和编码。所有通信内容都封装在UTF-8编码的JSON对象中。([raw_dr_deepseek.md, raw_dr_mita.md, raw_dr_openai_o3.md])
+MCP严格遵循JSON-RPC 2.0规范进行消息的格式化和编码。所有通信内容都封装在UTF-8编码的JSON对象中。
 
 **核心消息类型：**
 
@@ -86,7 +86,7 @@ MCP严格遵循JSON-RPC 2.0规范进行消息的格式化和编码。所有通�
     ```
 
 **批量调用 (Batch Calls)**:
-JSON-RPC 2.0允许将多个请求对象或通知对象封装在一个JSON数组中进行批量发送。Server应按顺序处理批量请求中的每个请求，并返回一个包含相应响应对象的数组。如果批量调用本身格式错误（例如不是数组），Server应返回单个响应对象。对于批量请求中的通知，不应生成响应。([raw_dr_openai_o3.md])
+JSON-RPC 2.0允许将多个请求对象或通知对象封装在一个JSON数组中进行批量发送。Server应按顺序处理批量请求中的每个请求，并返回一个包含相应响应对象的数组。如果批量调用本身格式错误（例如不是数组），Server应返回单个响应对象。对于批量请求中的通知，不应生成响应。
 
 *示例批量请求:*
 ```json
@@ -106,7 +106,7 @@ JSON-RPC 2.0允许将多个请求对象或通知对象封装在一个JSON数组�
 ```
 
 **可选编码：Protocol Buffers (Protobuf)**
-虽然JSON是主要的编码格式，但MCP也允许在需要更高性能或二进制传输的场景下使用Protocol Buffers。当使用Protobuf时，HTTP的 `Content-Type` 头部应设置为 `application/mcp+protobuf`。([raw_dr_perplexity.md]) 这为对性能有极致要求的应用提供了优化选项。
+虽然JSON是主要的编码格式，但MCP也允许在需要更高性能或二进制传输的场景下使用Protocol Buffers。当使用Protobuf时，HTTP的 `Content-Type` 头部应设置为 `application/mcp+protobuf`。 这为对性能有极致要求的应用提供了优化选项。
 
 ## 3.2 MCP的通信模式
 
@@ -127,9 +127,9 @@ MCP支持多种通信模式，以适应不同的交互需求和应用场景。�
 3.  **流式传输 (Streaming)**:
     *   **描述**: 允许数据以连续流的形式在Client和Server之间传输，而不是等待所有数据准备好后一次性发送。可以是单向流或双向流。
     *   **实现**:
-        *   **服务器到客户端流 (Server-to-Client Streaming)**: Server可以持续向Client发送一系列消息。Server-Sent Events (SSE) 是这种模式的典型实现，其中Server通过一个持久的HTTP连接向Client推送事件。([raw_dr_deepseek.md, raw_dr_grok.md]) WebSocket也天然支持服务器推送。
+        *   **服务器到客户端流 (Server-to-Client Streaming)**: Server可以持续向Client发送一系列消息。Server-Sent Events (SSE) 是这种模式的典型实现，其中Server通过一个持久的HTTP连接向Client推送事件。 WebSocket也天然支持服务器推送。
         *   **客户端到服务器流 (Client-to-Server Streaming)**: Client可以持续向Server发送数据流。例如，上传大文件时，数据可以分块流式传输。
-        *   **双向流 (Bidirectional Streaming)**: Client和Server可以同时、独立地相互发送数据流。WebSocket 和 gRPC (with streaming RPCs) 是实现双向流的常用技术。([raw_dr_mita.md, raw_dr_perplexity.md]) Streamable HTTP 也可以支持双向流。([raw_dr_deepseek.md])
+        *   **双向流 (Bidirectional Streaming)**: Client和Server可以同时、独立地相互发送数据流。WebSocket 和 gRPC (with streaming RPCs) 是实现双向流的常用技术。 Streamable HTTP 也可以支持双向流。
     *   **适用场景**: 
         *   实时数据更新（如股票行情、日志流）。
         *   处理大型数据集或文件，避免一次性加载到内存。
@@ -138,7 +138,7 @@ MCP支持多种通信模式，以适应不同的交互需求和应用场景。�
     *   **传输支持**: SSE (Server-to-Client), WebSocket (Bidirectional), gRPC (Bidirectional), Streamable HTTP (Bidirectional).
 
 4.  **发布/订阅 (Publish/Subscribe - Pub/Sub)**:
-    *   **描述**: 一种消息传递模式，其中消息的发送者（发布者）不直接将消息发送给特定的接收者（订阅者）。相反，发布者将消息分类到不同的主题（topics）或频道（channels），而订阅者则表示对一个或多个主题感兴趣。当有新消息发布到某个主题时，所有订阅了该主题的订阅者都会收到该消息。([raw_dr_openai_o3.md])
+    *   **描述**: 一种消息传递模式，其中消息的发送者（发布者）不直接将消息发送给特定的接收者（订阅者）。相反，发布者将消息分类到不同的主题（topics）或频道（channels），而订阅者则表示对一个或多个主题感兴趣。当有新消息发布到某个主题时，所有订阅了该主题的订阅者都会收到该消息。
     *   **实现**: MCP本身不直接定义Pub/Sub的语义，但可以通过在其上构建逻辑或利用支持Pub/Sub的底层消息队列（如NATS, Kafka, Redis Pub/Sub）并结合MCP进行消息内容的标准化来实现。在某些Agent架构中，这可能通过一个中介（Broker）或特定的MCP Server实现。
     *   **适用场景**: 
         *   事件驱动架构，当一个组件的状态变化需要通知多个其他组件时。
@@ -167,15 +167,15 @@ MCP本身作为一种通信协议，主要关注消息的结构和交换，并�
 
 1.  **传输层状态：**
     *   **连接状态**: 某些传输协议本身是面向连接的，如WebSocket、TCP（gRPC底层使用）。这些协议在Client和Server之间建立持久连接，连接本身就代表了一种会话状态（已连接、断开等）。
-        *   **心跳机制 (Heartbeat)**: 对于长连接（如WebSocket, SSE），通常会实现心跳机制。Client或Server定期发送小的探测消息，以确认对方仍然活跃并保持连接畅通。这有助于检测和处理网络中断或对端无响应的情况。([raw_dr_deepseek.md] 中Client层负责连接状态管理，包括心跳检测和断线重连)。
+        *   **心跳机制 (Heartbeat)**: 对于长连接（如WebSocket, SSE），通常会实现心跳机制。Client或Server定期发送小的探测消息，以确认对方仍然活跃并保持连接畅通。这有助于检测和处理网络中断或对端无响应的情况。 中Client层负责连接状态管理，包括心跳检测和断线重连)。
     *   **HTTP的无状态性与有状态模拟**: HTTP本身是无状态的，每个请求都是独立的。为了在HTTP上传输MCP并维护会话，通常采用以下方法：
         *   **Cookies/Tokens**: 在HTTP头部使用Cookies或Authorization Tokens（如JWT）来传递会话标识符。Server可以根据这些标识符来识别Client并恢复会话上下文。
-        *   **SSE (Server-Sent Events)**: SSE通过一个持久的HTTP连接实现服务器向客户端的单向事件流，这本身就构成了一个有状态的会话，直到连接关闭。([raw_dr_deepseek.md, raw_dr_grok.md])
+        *   **SSE (Server-Sent Events)**: SSE通过一个持久的HTTP连接实现服务器向客户端的单向事件流，这本身就构成了一个有状态的会话，直到连接关闭。
 
 2.  **应用层状态 (MCP层面及以上)：**
     *   **会话ID (Session ID)**: 即使传输层是无状态的，也可以在MCP消息的 `params` 中引入一个明确的 `session_id` 字段。Client在每次请求时都带上这个ID，Server根据此ID来查找和更新相关的会话数据。
-    *   **上下文管理 (Context Management)**: 这是LLM Agent的核心。Host层通常负责维护对话历史、用户偏好、先前工具调用的结果等上下文信息。([raw_dr_deepseek.md] 中Host层负责上下文管理)。当调用工具时，相关的上下文信息可能会被传递给MCP Client，再由Client决定哪些信息需要通过MCP消息的 `params` 传递给Server。
-        *   **MCP的 `ContextInject`**: Perplexity Labs提出的MCP扩展包含一个 `ContextInject` 操作，允许将外部数据（可能转化为向量嵌入）融入模型的内部知识，这是一种高级的上下文状态注入机制。([raw_dr_perplexity.md])
+    *   **上下文管理 (Context Management)**: 这是LLM Agent的核心。Host层通常负责维护对话历史、用户偏好、先前工具调用的结果等上下文信息。 中Host层负责上下文管理)。当调用工具时，相关的上下文信息可能会被传递给MCP Client，再由Client决定哪些信息需要通过MCP消息的 `params` 传递给Server。
+        *   **MCP的 `ContextInject`**: Perplexity Labs提出的MCP扩展包含一个 `ContextInject` 操作，允许将外部数据（可能转化为向量嵌入）融入模型的内部知识，这是一种高级的上下文状态注入机制。
     *   **Server端状态存储**: Server可能需要在多次请求之间保持特定于某个Client或会话的状态。例如，一个文件操作工具可能需要记住当前打开的文件或当前工作目录。这种状态可以存储在Server的内存中（适用于简单场景或单个Server实例）、分布式缓存（如Redis）或数据库中（适用于需要持久化和高可用的场景）。
     *   **工具描述中的状态暗示**: 虽然不直接是会话管理，但工具的元数据描述（`parameters`）可以暗示其操作是否具有副作用或依赖先前状态。
 
@@ -185,7 +185,7 @@ MCP本身作为一种通信协议，主要关注消息的结构和交换，并�
 **MCP Client和Server的职责：**
 *   **MCP Client**: 
     *   可能负责生成和管理会话ID（如果应用层需要）。
-    *   处理与Server的连接建立、维护（如心跳、重连）。([raw_dr_deepseek.md])
+    *   处理与Server的连接建立、维护（如心跳、重连）。
     *   从Host获取必要的上下文信息，并决定如何将其传递给Server。
 *   **MCP Server**: 
     *   根据请求中的会话标识符（如果有）或连接信息来区分不同的会话。
@@ -205,7 +205,7 @@ MCP利用JSON-RPC 2.0规范中定义的错误处理机制来管理通信和执�
 
 **1. JSON-RPC 2.0 错误对象：**
 
-当请求无法被正确处理时，Server必须返回一个包含 `error` 成员的JSON-RPC响应对象。`error` 成员本身是一个对象，包含以下字段：([raw_dr_deepseek.md, raw_dr_openai_o3.md])
+当请求无法被正确处理时，Server必须返回一个包含 `error` 成员的JSON-RPC响应对象。`error` 成员本身是一个对象，包含以下字段：
 
 *   `code`: INTEGER - 一个数字，指示错误的类型。JSON-RPC 2.0预定义了一系列错误码，并且允许实现者定义自己的服务器特定错误码。
 *   `message`: STRING - 对错误的简短、人类可读的描述。
@@ -259,7 +259,6 @@ MCP协议本身（即JSON-RPC 2.0）不直接定义或强制执行重试机制�
     *   **超时设置**: 为每次重试设置合理的超时时间。
 
 **Cursor MCP Client的例子：**
-在Cursor的MCP实现中，`mcp-client` 库包含了一些关于连接管理和潜在重试的逻辑。例如，它会处理Stdio传输的意外关闭，并可能尝试重新启动Server进程。([raw_dr_deepseek.md] 提到Client层管理连接状态，包括断线重连)。这种特定于实现的重试逻辑超出了核心MCP规范的范围。
+在Cursor的MCP实现中，`mcp-client` 库包含了一些关于连接管理和潜在重试的逻辑。例如，它会处理Stdio传输的意外关闭，并可能尝试重新启动Server进程。 提到Client层管理连接状态，包括断线重连)。这种特定于实现的重试逻辑超出了核心MCP规范的范围。
 
 总结而言，MCP依赖JSON-RPC 2.0提供了一套清晰的错误报告机制。而复杂的重试逻辑、超时管理和对特定网络错误的处理则由MCP Client的实现者根据应用的健壮性需求来设计和实现。
-

@@ -80,7 +80,7 @@ MCP（Model Context Protocol）作为一种旨在连接大型语言模型（LLM�
 
 *   **单一职责原则 (SRP)**: 每个MCP方法（工具）应专注于一个明确的功能。避免创建过于庞大、功能混杂的工具。
 *   **明确的输入输出Schema**: 
-    *   使用JSON Schema或其他严格的模式定义语言来描述每个工具的输入参数 (`input_schema`) 和输出结果 (`output_schema`)。([raw_dr_deepseek.md])
+    *   使用JSON Schema或其他严格的模式定义语言来描述每个工具的输入参数 (`input_schema`) 和输出结果 (`output_schema`)。
     *   Schema应尽可能详细，包括数据类型、格式、是否必需、枚举值、默认值、以及字段描述。
     *   这有助于Client正确构造请求，并理解Server的响应，同时也便于Server进行输入验证。
 *   **人类可读的描述**: 为每个工具及其参数提供清晰、简洁的 `description`。这不仅帮助开发者理解工具用途，LLM Agent也可能利用这些描述来决定何时以及如何使用该工具。
@@ -89,13 +89,13 @@ MCP（Model Context Protocol）作为一种旨在连接大型语言模型（LLM�
 **2. 安全性优先：**
 
 *   **认证与授权**: 
-    *   实现强大的认证机制（如API密钥、OAuth 2.0、mTLS）来验证Client身份。([raw_dr_mita.md, raw_dr_grok.md])
-    *   实施细粒度的授权策略（如基于角色的访问控制RBAC、基于范围的权限`required_scopes`），确保Client只能访问其被授权的工具和数据。([raw_dr_deepseek.md])
+    *   实现强大的认证机制（如API密钥、OAuth 2.0、mTLS）来验证Client身份。
+    *   实施细粒度的授权策略（如基于角色的访问控制RBAC、基于范围的权限`required_scopes`），确保Client只能访问其被授权的工具和数据。
     *   遵循最小权限原则。
 *   **输入验证与清理**: 
     *   严格根据 `input_schema` 验证所有来自Client的输入数据。绝不信任外部输入。
     *   对输入数据进行清理（Sanitization），以防止注入攻击（如SQL注入、命令注入、XSS等），尤其当输入会用于构造数据库查询、执行系统命令或生成HTML时。
-*   **传输安全**: 强制使用TLS/HTTPS来加密MCP通信，保护数据在传输过程中的机密性和完整性。([raw_dr_deepseek.md])
+*   **传输安全**: 强制使用TLS/HTTPS来加密MCP通信，保护数据在传输过程中的机密性和完整性。
 *   **资源隔离与沙箱化**: 如果工具执行潜在的危险操作（如执行代码、访问文件系统），应在隔离的环境（如Docker容器、沙箱）中运行，并限制其资源访问权限。
 *   **错误处理与信息隐藏**: 错误消息应提供足够的信息供调试，但避免泄露敏感的系统内部细节或堆栈跟踪给Client。
 *   **依赖安全**: 定期扫描和更新Server依赖的库和框架，修补已知漏洞。
@@ -182,7 +182,7 @@ MCP（Model Context Protocol）作为一种旨在连接大型语言模型（LLM�
 
 **4. 上下文管理 (Context Management)：**
 
-*   **利用 `ContextID`**: 如果MCP Server支持Perplexity Labs提出的上下文管理机制，Agent应在连续的交互中传递和更新 `ContextID`，以帮助Server维护与特定对话或任务相关的状态。([raw_dr_perplexity.md])
+*   **   利用 `ContextID`**: 如果MCP Server支持Perplexity Labs提出的上下文管理机制，Agent应在连续的交互中传递和更新 `ContextID`，以帮助Server维护与特定对话或任务相关的状态。
 *   **Agent端上下文维护**: LLM Agent本身也需要维护对话历史、用户偏好、先前工具调用结果等上下文信息。这些信息会影响其工具选择和参数生成。
 *   **`ContextInject` 的策略性使用**: 谨慎使用 `ContextInject` 来动态更新Server端的上下文，确保注入的内容是相关且安全的。
 
@@ -204,4 +204,3 @@ MCP（Model Context Protocol）作为一种旨在连接大型语言模型（LLM�
 *   **端到端测试**: 测试从用户输入到Agent理解、工具调用、结果处理、最终回复的完整流程。
 
 通过遵循这些最佳实践，可以构建出更智能、更可靠、更安全的LLM Agent，使其能够充分利用MCP协议连接的外部工具和服务，从而提供更强大和有用的功能。
-

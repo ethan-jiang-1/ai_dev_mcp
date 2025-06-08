@@ -11,17 +11,17 @@ MCP（Model Context Protocol）的设计目标之一就是良好的互操作性�
 MCP本身专注于应用层消息的格式和交互模式，它并不重新发明轮子去定义传输层。相反，它明确支持并推荐在成熟的、广泛使用的传输协议之上运行：
 
 *   **HTTP/1.1 和 HTTP/2**: 
-    *   **集成方式**: MCP消息（JSON-RPC 2.0格式）可以直接作为HTTP请求/响应的Body进行传输。HTTP头部可以用于传递元数据、认证信息（如API密钥、Bearer Token）等。([raw_dr_deepseek.md, raw_dr_mita.md])
+    *   **集成方式**: MCP消息（JSON-RPC 2.0格式）可以直接作为HTTP请求/响应的Body进行传输。HTTP头部可以用于传递元数据、认证信息（如API密钥、Bearer Token）等。
     *   **优点**: HTTP的普及性极高，几乎所有的编程语言和平台都有成熟的HTTP客户端和服务器库。易于调试（通过curl、Postman等工具）。支持各种网络基础设施（如负载均衡器、API网关）。
-    *   **SSE (Server-Sent Events)**: 对于流式数据，MCP可以通过HTTP上的SSE实现从Server到Client的单向流。([raw_dr_deepseek.md])
+    *   **SSE (Server-Sent Events)**: 对于流式数据，MCP可以通过HTTP上的SSE实现从Server到Client的单向流。
 *   **WebSocket**: 
     *   **集成方式**: WebSocket提供全双工的持久连接，非常适合MCP中需要低延迟、双向通信的场景，如流式响应、实时通知等。MCP消息可以直接在WebSocket帧中传输。
     *   **优点**: 相比HTTP轮询或SSE，WebSocket在实时性和效率上更有优势，减少了连接建立的开销。
 *   **gRPC**: 
-    *   **集成方式**: 虽然MCP的核心消息格式是JSON-RPC 2.0，但其概念可以映射到gRPC的服务定义（`.proto`文件）。可以使用Protobuf作为可选的、更高效的序列化格式，并通过gRPC的HTTP/2传输。([raw_dr_openai_o3.md] 提到可选Protobuf编码)。
+    *   **集成方式**: 虽然MCP的核心消息格式是JSON-RPC 2.0，但其概念可以映射到gRPC的服务定义（`.proto`文件）。可以使用Protobuf作为可选的、更高效的序列化格式，并通过gRPC的HTTP/2传输。 提到可选Protobuf编码。
     *   **优点**: gRPC提供强类型、高性能的RPC机制，支持双向流，自动生成客户端和服务端存根代码，内置TLS支持。
 *   **Stdio (标准输入/输出)**: 
-    *   **集成方式**: 用于本地父子进程间的通信，例如LLM应用（父进程）直接启动和控制一个本地工具（子进程作为MCP Server）。MCP消息通过标准输入和标准输出流进行交换。([raw_dr_deepseek.md])
+    *   **集成方式**: 用于本地父子进程间的通信，例如LLM应用（父进程）直接启动和控制一个本地工具（子进程作为MCP Server）。MCP消息通过标准输入和标准输出流进行交换。
     *   **优点**: 配置简单，延迟极低，安全性较高（在受控的本地环境）。
 
 **2. 与消息队列 (Message Queues - MQ) 的集成：**
@@ -69,7 +69,7 @@ MCP（Model Context Protocol）在设计时充分考虑了未来的功能扩展�
 **1. 基于JSON-RPC 2.0的灵活性：**
 
 *   **`method` 字段的任意性**: JSON-RPC 2.0的核心是 `method` 字段，它是一个字符串，用于指定要调用的方法。MCP利用这一点，允许Server定义任意数量和名称的工具方法。新的工具或功能可以通过简单地在Server端实现新的方法并更新工具描述来添加，而无需修改协议本身的核心结构。
-*   **`params` 字段的结构化与可变性**: `params` 字段可以是结构化对象（JSON Object）或数组（JSON Array）。这为不同方法传递不同类型和数量的参数提供了极大的灵活性。当需要为现有方法添加新参数时，如果参数是对象类型，可以向后兼容地添加新的可选属性。([raw_dr_deepseek.md] 提到 `params` 可以是JSON对象或数组)。
+*   **`params` 字段的结构化与可变性**: `params` 字段可以是结构化对象（JSON Object）或数组（JSON Array）。这为不同方法传递不同类型和数量的参数提供了极大的灵活性。当需要为现有方法添加新参数时，如果参数是对象类型，可以向后兼容地添加新的可选属性。 提到 `params` 可以是JSON对象或数组。
 *   **`result` 字段的任意性**: 成功的响应中的 `result` 字段可以是任何有效的JSON值，允许工具方法返回复杂的数据结构。
 *   **`error` 对象的扩展性**: JSON-RPC 2.0的 `error` 对象包含 `code` (整数)、`message` (字符串) 和可选的 `data` 字段。`data` 字段可以携带特定于错误的额外信息，为错误处理提供了扩展空间。
 
@@ -77,12 +77,12 @@ MCP（Model Context Protocol）在设计时充分考虑了未来的功能扩展�
 
 MCP Server通过提供工具描述来告知Client其能力。这个描述本身就是一种元数据，可以进行扩展：
 
-*   **自定义元数据字段**: 工具描述（通常是JSON格式）可以包含预定义的字段（如 `name`, `description`, `input_schema`, `output_schema`, `required_scopes`），但也允许添加自定义的元数据字段，以支持特定的Server或Client需求，例如版本信息、依赖项、使用限制等。([raw_dr_deepseek.md] 描述了工具元数据)。
+*   **自定义元数据字段**: 工具描述（通常是JSON格式）可以包含预定义的字段（如 `name`, `description`, `input_schema`, `output_schema`, `required_scopes`），但也允许添加自定义的元数据字段，以支持特定的Server或Client需求，例如版本信息、依赖项、使用限制等。 描述了工具元数据。
 *   **Schema的演进**: `input_schema` 和 `output_schema` (通常使用JSON Schema) 可以随着工具功能的演进而更新。JSON Schema本身支持版本控制和向后兼容的修改（如添加可选字段）。
 
 **3. 可选的编码格式：**
 
-虽然JSON是默认且广泛支持的编码格式，但MCP的设计也考虑了对其他编码格式（如Protobuf）的可选支持。([raw_dr_openai_o3.md] 提到可选Protobuf编码)。这允许在对性能或带宽有更高要求的场景下采用更高效的二进制编码，而无需改变协议的核心语义。
+虽然JSON是默认且广泛支持的编码格式，但MCP的设计也考虑了对其他编码格式（如Protobuf）的可选支持。 提到可选Protobuf编码。这允许在对性能或带宽有更高要求的场景下采用更高效的二进制编码，而无需改变协议的核心语义。
 
 **4. 通信模式的扩展：**
 
@@ -104,7 +104,7 @@ MCP定义了多种通信模式（请求/响应、通知、流式、发布/订阅
 
 **7. `ContextID` 和 `ContextInject` 的设计：**
 
-Perplexity Labs提出的 `ContextID` 和 `ContextInject` 机制本身就是一种强大的扩展，它允许动态管理和注入上下文，极大地增强了协议的灵活性和对复杂对话流程的支持。([raw_dr_perplexity.md]) 这种通过核心原语实现高级功能的方式是可扩展性的体现。
+Perplexity Labs提出的 `ContextID` 和 `ContextInject` 机制本身就是一种强大的扩展，它允许动态管理和注入上下文，极大地增强了协议的灵活性和对复杂对话流程的支持。 这种通过核心原语实现高级功能的方式是可扩展性的体现。
 
 **8. 社区驱动与标准化过程：**
 
@@ -200,4 +200,3 @@ MCP（Model Context Protocol）凭借其灵活的通信模式、对多种传输�
     *   **长轮询/回调**: 对于耗时较长的后台任务，MCP Client可以使用长轮询等待结果，或者MCP Server在任务完成后通过回调URL（如果Client提供了）或消息队列通知Client。
 
 在这些不同的场景中，MCP提供了一个统一的、与LLM Agent交互的抽象层。它使得工具的开发者可以专注于实现其核心功能，并将其通过标准化的MCP接口暴露出来；同时，LLM Agent的开发者可以更容易地发现和集成各种外部能力，而无需为每种工具学习不同的API和协议。这种解耦和标准化是MCP适应性的关键所在。
-

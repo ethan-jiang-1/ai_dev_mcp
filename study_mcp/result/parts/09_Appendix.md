@@ -44,9 +44,9 @@
 
 **核心概念与LLM Agent工具使用：**
 
-1.  **DeepSeek AI (raw_dr_deepseek.md)**: 该文档中明确提出了MCP（Model Context Protocol）的设计，包括其基于JSON-RPC 2.0的请求/响应、通知、流式、发布/订阅等通信模式，以及工具描述、上下文管理（ContextID, ContextInject）和安全性考虑。这是理解本文所述MCP最直接的参考来源之一。
-2.  **Perplexity Labs (raw_dr_perplexity.md)**: 其研究中可能探讨了LLM与外部工具交互的协议扩展，强调了上下文管理和多模态支持的重要性。这为MCP的上下文管理和未来发展方向提供了思路。
-3.  **OpenAI - Function calling and other API updates (raw_dr_openai_o3.md)**: OpenAI API中引入的函数调用（Function Calling）功能，允许开发者向GPT模型描述函数，并让模型智能地选择输出一个包含调用这些函数参数的JSON对象。这在实践上与MCP的核心目标——使LLM能够调用外部工具——高度一致。其设计（如JSON Schema描述函数、JSON输出）是MCP工具描述和消息格式的重要参考。
+1.  **DeepSeek AI**: 该文档中明确提出了MCP（Model Context Protocol）的设计，包括其基于JSON-RPC 2.0的请求/响应、通知、流式、发布/订阅等通信模式，以及工具描述、上下文管理（ContextID, ContextInject）和安全性考虑。这是理解本文所述MCP最直接的参考来源之一。
+2.  **Perplexity Labs**: 其研究中可能探讨了LLM与外部工具交互的协议扩展，强调了上下文管理和多模态支持的重要性。这为MCP的上下文管理和未来发展方向提供了思路。
+3.  **OpenAI - Function calling and other API updates**: OpenAI API中引入的函数调用（Function Calling）功能，允许开发者向GPT模型描述函数，并让模型智能地选择输出一个包含调用这些函数参数的JSON对象。这在实践上与MCP的核心目标——使LLM能够调用外部工具——高度一致。其设计（如JSON Schema描述函数、JSON输出）是MCP工具描述和消息格式的重要参考。
 4.  **OpenAI Assistants API - Tools**: Assistants API进一步扩展了工具使用的概念，允许创建可以访问工具（如Code Interpreter, Knowledge Retrieval, Function calling）的AI助手。其对工具的集成和管理方式对MCP的生态建设有借鉴意义。
 5.  **LangChain Documentation - Tools & Agents**: LangChain是一个广泛用于构建LLM应用的框架，其核心组件之一就是Tools和Agents。LangChain对如何定义工具、Agent如何选择和调用工具、以及如何处理工具的输出提供了丰富的实践和抽象。这可以看作是一种特定框架下的“类MCP”实现。
 6.  **LlamaIndex Documentation - Data Connectors & Query Engines**: LlamaIndex专注于将LLM与外部数据源连接。其数据连接器和查询引擎的设计，涉及到如何让LLM有效地从不同来源获取和处理信息，与MCP的目标相通。
@@ -81,4 +81,3 @@
 19. *"Designing Data-Intensive Applications"* by Martin Kleppmann: 虽然不直接讲API协议，但深入探讨了分布式系统中数据一致性、可伸缩性、可靠性等核心问题，这些对于设计健壮的MCP Server和生态系统至关重要。
 
 建议读者根据自己的兴趣点和技术背景，选择性地深入阅读以上文献和资源。由于该领域发展迅速，持续关注最新的研究论文、技术博客和开源项目动态也非常重要。
-
